@@ -18,6 +18,7 @@ Day 3-4: 进阶RAG策略实现
 
 import os
 import re
+import sys
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from dotenv import load_dotenv
@@ -25,10 +26,11 @@ from dotenv import load_dotenv
 # 加载环境变量
 load_dotenv()
 
+# 添加项目根目录到路径，支持跨模块导入
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 # 导入基础RAG模块的数据模型
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'day01_02_basic_rag'))
-from basic_rag_pipeline import Document, Chunk, SearchResult, VectorStore, LLMClient
+from day01_02_basic_rag.basic_rag_pipeline import Document, Chunk, SearchResult, VectorStore, LLMClient
 
 
 # ============================================================
@@ -684,12 +686,9 @@ class AdvancedRAGSystem:
         self.mode = mode
         self.top_k = top_k
         
-        # 导入基础组件
-        from day01_02_basic_rag.basic_rag_pipeline import (
-            DocumentLoader, TextChunker
-        )
+        # 初始化基础组件（使用已导入的模块）
+        from day01_02_basic_rag.basic_rag_pipeline import DocumentLoader, TextChunker
         
-        # 初始化基础组件
         self.loader = DocumentLoader()
         self.chunker = TextChunker(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         

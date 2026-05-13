@@ -1,0 +1,30 @@
+# Python环境配置指南
+
+## 安装Python
+1. 访问Python官网：https://www.python.org/
+2. 下载适合你操作系统的安装包
+3. 运行安装程序，确保勾选"Add Python to PATH"
+4. 完成安装后，在命令行输入 python --version 验证
+
+## 配置虚拟环境
+推荐使用venv或conda创建虚拟环境：
+
+使用venv：
+```bash
+python -m venv myenv
+source myenv/bin/activate  # Linux/Mac
+myenv\Scripts\activate    # Windows
+```
+
+## 安装依赖
+使用pip安装项目依赖：
+```bash
+pip install -r requirements.txt
+```
+
+## 常见问题
+Q: 如何升级pip？
+A: 运行 python -m pip install --upgrade pip
+
+Q: 如何解决依赖冲突？
+A: 使用虚拟环境隔离不同项目的依赖

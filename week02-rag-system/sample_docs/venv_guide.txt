@@ -1,0 +1,47 @@
+# Python虚拟环境管理
+
+## 什么是虚拟环境
+虚拟环境是Python项目的独立空间，包含该项目所需的依赖包。
+使用虚拟环境可以避免不同项目之间的依赖冲突。
+
+## 创建虚拟环境
+使用venv模块创建虚拟环境：
+```bash
+python -m venv myenv
+```
+
+## 激活虚拟环境
+Windows:
+```bash
+myenv\Scripts\activate
+```
+
+Linux/Mac:
+```bash
+source myenv/bin/activate
+```
+
+## 安装依赖
+激活虚拟环境后，使用pip安装依赖：
+```bash
+pip install requests numpy pandas
+```
+
+## 导出依赖
+将当前环境的依赖导出到文件：
+```bash
+pip freeze > requirements.txt
+```
+
+## 从文件安装依赖
+从requirements.txt安装所有依赖：
+```bash
+pip install -r requirements.txt
+```
+
+## 常见问题
+Q: 虚拟环境占用多少空间？
+A: 通常几十MB到几百MB，取决于安装的包数量。
+
+Q: 如何删除虚拟环境？
+A: 直接删除虚拟环境文件夹即可。

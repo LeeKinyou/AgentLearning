@@ -18,6 +18,7 @@ Day 5-7: 可观测性与评估系统
 """
 
 import os
+import sys
 import time
 import json
 from typing import List, Dict, Optional, Any
@@ -27,6 +28,9 @@ from dotenv import load_dotenv
 
 # 加载环境变量
 load_dotenv()
+
+# 添加项目根目录到路径，支持跨模块导入
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 
 # ============================================================

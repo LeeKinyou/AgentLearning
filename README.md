@@ -33,10 +33,10 @@
 
 #### Day 1-2：环境与LLM初体验
 
-- [ ] 配置Python开发环境（推荐uv/pipenv）
-- [ ] 安装并测试主流LLM SDK（OpenAI、Anthropic等）
-- [ ] 完成首次API调用，理解Token、Temperature等核心参数
-- [ ] 实践：编写一个简单的对话脚本
+- [x] 配置Python开发环境（推荐uv/pipenv）
+- [x] 安装并测试主流LLM SDK（OpenAI、Anthropic等）
+- [x] 完成首次API调用，理解Token、Temperature等核心参数
+- [x] 实践：编写一个简单的对话脚本
 
 #### Day 3-4：异步编程、结构化输出与Prompt工程
 
@@ -327,5 +327,3 @@ AgentLearning/
 ---
 
 > 💡 **核心理念**：不追求成为"API调用侠"，而是培养"Agent系统工程师"的系统思维与工程能力。
-
-**祝你学习顺利！🚀**

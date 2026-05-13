@@ -1,0 +1,36 @@
+# Git版本控制指南
+
+## 初始化仓库
+```bash
+git init
+```
+
+## 添加文件
+```bash
+git add .
+git commit -m "Initial commit"
+```
+
+## 查看状态
+```bash
+git status
+```
+
+## 查看历史
+```bash
+git log
+git log --oneline
+```
+
+## 分支管理
+创建分支：
+```bash
+git branch feature-1
+git checkout feature-1
+```
+
+合并分支：
+```bash
+git checkout main
+git merge feature-1
+```
