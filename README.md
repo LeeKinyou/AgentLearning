@@ -40,26 +40,26 @@
 
 #### Day 3-4：异步编程、结构化输出与Prompt工程
 
-- [ ] 掌握Python `asyncio` 异步编程范式
-- [ ] 使用Pydantic实现LLM结构化输出
-- [ ] 学习Prompt工程核心技巧：
+- [x] 掌握Python `asyncio` 异步编程范式
+- [x] 使用Pydantic实现LLM结构化输出
+- [x] 学习Prompt工程核心技巧：
   - System Prompt设计原则
   - Few-shot Prompting
   - Chain-of-Thought (CoT)
   - ReAct Prompting
-- [ ] 实践：构建一个带结构化输出的Prompt模板库
+- [x] 实践：构建一个带结构化输出的Prompt模板库
 
 #### Day 5-7：手写ReAct Agent
 
-- [ ] 理解ReAct范式：Reason + Act 循环
-- [ ] 从零实现Agent核心组件：
+- [x] 理解ReAct范式：Reason + Act 循环
+- [x] 从零实现Agent核心组件：
   - LLM调用层
   - Tool定义与注册机制
   - Thought-Action-Observation循环
   - 终止条件判断
-- [ ] 实践：手写一个能使用搜索/计算工具的ReAct Agent
+- [x] 实践：手写一个能使用搜索/计算工具的ReAct Agent
 
-**✅ 本周交付物**：一个不依赖任何Agent框架的手写ReAct Agent实现
+**本周交付物**：一个不依赖任何Agent框架的手写ReAct Agent实现
 
 ---
 
@@ -69,27 +69,27 @@
 
 #### Day 1-4：基础与进阶RAG
 
-- [ ] 实现基础RAG流水线：
+- [x] 实现基础RAG流水线：
   - 文档加载与分块（Chunking策略）
   - 向量化与向量数据库（Chroma/Milvus等）
   - 相似度检索与答案生成
-- [ ] 进阶RAG策略：
+- [x] 进阶RAG策略：
   - 混合检索（BM25 + 向量检索）
   - 重排序（Reranking）
   - 查询重写与扩展
-- [ ] 实践：构建一个基于企业文档的问答系统
+- [x] 实践：构建一个基于企业文档的问答系统
 
 #### Day 5-7：可观测性与评估
 
-- [ ] 接入LangFuse记录调用链：
+- [x] 接入LangFuse记录调用链：
   - Trace/Span概念理解
   - 关键指标埋点（延迟、Token消耗、成本）
-- [ ] RAG系统评估：
+- [x] RAG系统评估：
   - 使用Ragas框架进行自动化评估
   - 核心指标：Faithfulness、Answer Relevance、Context Precision
-- [ ] 实践：为RAG系统编写评估脚本并生成报告
+- [x] 实践：为RAG系统编写评估脚本并生成报告
 
-**✅ 本周交付物**：一个带可观测性和评估体系的进阶RAG系统
+**本周交付物**：一个带可观测性和评估体系的进阶RAG系统
 
 ---
 
@@ -123,7 +123,7 @@
   - 加入Human-in-the-loop机制
 - [ ] 实践：用LangGraph实现一个多步骤工作流Agent
 
-**✅ 本周交付物**：基于LangGraph的复杂Agent工作流实现
+**本周交付物**：基于LangGraph的复杂Agent工作流实现
 
 ---
 
@@ -150,7 +150,7 @@
 - [ ] 实现并调试协作流程
 - [ ] 总结多Agent系统的设计模式与常见陷阱
 
-**✅ 本周交付物**：一个完整的多Agent协作Demo及框架对比分析
+**本周交付物**：一个完整的多Agent协作Demo及框架对比分析
 
 ---
 
@@ -195,7 +195,7 @@
   - 单元测试与集成测试
 - [ ] 实践：模拟故障场景并验证系统恢复能力
 
-**✅ 本周交付物**：一个带智能网关和监控的生产级Agent服务
+**本周交付物**：一个带智能网关和监控的生产级Agent服务
 
 ---
 
