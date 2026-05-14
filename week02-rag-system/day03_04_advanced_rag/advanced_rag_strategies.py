@@ -247,7 +247,7 @@ class HybridRetriever:
         self.k = k
         self.vector_weight = vector_weight
         self.bm25_retriever = BM25Retriever()
-        self.vector_store = None
+        self.vector_store: Optional[VectorStore] = None
     
     def index(self, chunks: List[Chunk], collection_name: str = "hybrid_index"):
         """
@@ -293,6 +293,8 @@ class HybridRetriever:
         """
         # 分别检索
         bm25_results = self.bm25_retriever.search(query, top_k=top_k * 2)
+        if self.vector_store is None:
+            raise RuntimeError("请先调用 index() 方法建立向量索引")
         vector_results = self.vector_store.search(query, top_k=top_k * 2)
         
         # 构建结果映射
@@ -556,6 +558,8 @@ class QueryRewriter:
         response = self.llm.chat(messages)
         
         # 解析响应，每行一个查询
+        if response is None:
+            return []
         expansions = [line.strip() for line in response.split('\n') if line.strip()]
         
         # 限制数量
@@ -599,6 +603,8 @@ class QueryRewriter:
         response = self.llm.chat(messages)
         
         # 解析响应
+        if response is None:
+            return []
         sub_queries = [line.strip() for line in response.split('\n') if line.strip()]
         
         return sub_queries

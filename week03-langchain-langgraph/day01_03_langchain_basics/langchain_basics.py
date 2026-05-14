@@ -24,6 +24,7 @@ import os
 import sys
 from typing import List, Dict, Optional, Any
 from dotenv import load_dotenv
+from pydantic import SecretStr
 
 # 加载环境变量
 load_dotenv()
@@ -64,7 +65,7 @@ def create_llm(temperature: float = 0.0, model: str | None = None):
     return ChatOpenAI(
         model=model_name,
         temperature=temperature,
-        api_key=api_key,
+        api_key=SecretStr(api_key),
         base_url=base_url,
     )
 
@@ -164,7 +165,7 @@ def demonstrate_chains():
     
     recommendation_chain = rec_prompt | structured_llm
     
-    recommendation = recommendation_chain.invoke({"interest": "人工智能"})
+    recommendation: BookRecommendation = recommendation_chain.invoke({"interest": "人工智能"})
     print(f"推荐书籍：{recommendation.title}")
     print(f"作者：{recommendation.author}")
     print(f"推荐理由：{recommendation.reason}")
@@ -378,8 +379,8 @@ def demonstrate_langchain_agent():
     print("=" * 60)
     
     from langchain_core.tools import tool
-    from langchain.agents import create_tool_calling_agent, AgentExecutor
-    from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+    from langgraph.prebuilt import create_react_agent
+    from langchain_core.messages import HumanMessage
     
     llm = create_llm(temperature=0.0)
     
@@ -405,36 +406,9 @@ def demonstrate_langchain_agent():
     
     tools = [calculator, get_date_info]
     
-    # 创建Agent Prompt
-    # MessagesPlaceholder用于放置Agent的思考过程（chat_history）
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """你是一个有用的助手，可以使用工具来帮助用户回答问题。
-
-你可以使用以下工具：
-{tools}
-
-请使用以下格式：
-- 思考用户需要什么
-- 如果需要，使用工具
-- 给出最终答案"""),
-        MessagesPlaceholder(variable_name="chat_history", optional=True),
-        ("human", "{input}"),
-        MessagesPlaceholder(variable_name="agent_scratchpad"),
-    ])
-    
-    # 创建Agent
-    # create_tool_calling_agent 自动处理工具调用逻辑
-    agent = create_tool_calling_agent(llm, tools, prompt)
-    
-    # 创建Agent执行器
-    # AgentExecutor 负责运行Agent循环，处理工具调用
-    agent_executor = AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=True,  # 显示详细的执行过程
-        handle_parsing_errors=True,  # 处理解析错误
-        max_iterations=5,  # 最大迭代次数
-    )
+    # 使用LangGraph的create_react_agent创建Agent
+    # 这是新版langchain推荐的Agent构建方式
+    agent = create_react_agent(llm, tools)
     
     # 测试Agent
     test_questions = [
@@ -448,8 +422,20 @@ def demonstrate_langchain_agent():
         print(f"问题：{question}")
         print(f"{'=' * 40}")
         
-        result = agent_executor.invoke({"input": question, "chat_history": []})
-        print(f"\n最终答案：{result['output']}")
+        result = agent.invoke({"messages": [HumanMessage(content=question)]})
+        
+        # 提取最后一条AI消息作为答案
+        from langchain_core.messages import AIMessage, ToolMessage
+        last_ai_msg = None
+        for msg in reversed(result.get("messages", [])):
+            if isinstance(msg, AIMessage) and msg.content:
+                last_ai_msg = msg
+                break
+        
+        if last_ai_msg:
+            print(f"\n最终答案：{last_ai_msg.content}")
+        else:
+            print(f"\n最终答案：无回复")
 
 
 # ============================================================
