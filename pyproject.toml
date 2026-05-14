@@ -16,3 +16,16 @@ dependencies = [
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.2",
 ]
+
+[tool.pyright]
+extraPaths = [
+    "week01-llm-basics/day01_03_llm_basics",
+    "week01-llm-basics/day04_05_async",
+    "week01-llm-basics/day06_prompt_engineering",
+    "week01-llm-basics/day07_react_agent",
+    "week02-rag-system/day01_02_basic_rag",
+    "week02-rag-system/day03_04_advanced_rag",
+    "week02-rag-system/day05_07_observability",
+    "week03-langchain-langgraph/day01_03_langchain_basics",
+    "week03-langchain-langgraph/day04_07_langgraph",
+]

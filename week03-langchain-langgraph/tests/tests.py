@@ -18,8 +18,10 @@ import sys
 import unittest
 from typing import List, TypedDict
 
-# 添加项目根目录到路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# 添加week03根目录到路径，支持包导入
+_week03_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if _week03_root not in sys.path:
+    sys.path.insert(0, _week03_root)
 
 
 # ============================================================
@@ -31,13 +33,9 @@ class TestLangChainBasics(unittest.TestCase):
     
     def test_llm_creation(self):
         """测试LLM实例创建"""
-        import importlib.util
-        module_path = os.path.join(os.path.dirname(__file__), '..', 'day01_03_langchain_basics', 'langchain_basics.py')
-        spec = importlib.util.spec_from_file_location("langchain_basics", module_path)
-        langchain_basics = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(langchain_basics)
+        from day01_03_langchain_basics.langchain_basics import create_llm
         
-        llm = langchain_basics.create_llm(temperature=0.5)
+        llm = create_llm(temperature=0.5)
         self.assertIsNotNone(llm)
         self.assertEqual(llm.temperature, 0.5)
     
