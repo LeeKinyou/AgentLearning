@@ -31,10 +31,13 @@ class TestLangChainBasics(unittest.TestCase):
     
     def test_llm_creation(self):
         """测试LLM实例创建"""
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'day01_03_langchain_basics'))
-        from langchain_basics import create_llm
+        import importlib.util
+        module_path = os.path.join(os.path.dirname(__file__), '..', 'day01_03_langchain_basics', 'langchain_basics.py')
+        spec = importlib.util.spec_from_file_location("langchain_basics", module_path)
+        langchain_basics = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(langchain_basics)
         
-        llm = create_llm(temperature=0.5)
+        llm = langchain_basics.create_llm(temperature=0.5)
         self.assertIsNotNone(llm)
         self.assertEqual(llm.temperature, 0.5)
     
