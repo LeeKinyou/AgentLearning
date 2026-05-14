@@ -561,9 +561,11 @@ def demonstrate_human_in_loop():
     def check_approval(state: ApprovalState) -> Literal["publish", "reject"]:
         """根据审核结果决定下一步"""
         if state["approved"]:
-            return "publish"
+            result: Literal["publish", "reject"] = "publish"  # type: ignore[assignment]
+            return result
         else:
-            return "reject"
+            result: Literal["publish", "reject"] = "reject"  # type: ignore[assignment]
+            return result
     
     # --- 4. 构建图 ---
     builder = StateGraph(ApprovalState)
@@ -703,9 +705,11 @@ def demonstrate_workflow_agent():
     def check_review(state: WorkflowState) -> Literal["finalize", "revise"]:
         """根据审核结果决定下一步"""
         if state["review_passed"]:
-            return "finalize"
+            result: Literal["finalize", "revise"] = "finalize"  # type: ignore[assignment]
+            return result
         else:
-            return "revise"
+            result: Literal["finalize", "revise"] = "revise"  # type: ignore[assignment]
+            return result
     
     # --- 4. 构建图 ---
     builder = StateGraph(WorkflowState)
