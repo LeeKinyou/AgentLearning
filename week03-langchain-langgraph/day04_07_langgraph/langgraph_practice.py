@@ -416,7 +416,8 @@ def demonstrate_conditional_routing():
         注意：
             返回值必须是图中已定义的节点名称
         """
-        return state["intent"]
+        intent: Literal["math", "date", "greeting", "unknown"] = state["intent"]  # type: ignore[assignment]
+        return intent
     
     # --- 4. 构建图 ---
     builder = StateGraph(RouterState)

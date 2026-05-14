@@ -274,7 +274,8 @@ class TestConditionalRouting(unittest.TestCase):
             return {"result": "文本处理结果"}
         
         def route_func(state: RouteState) -> Literal["math", "text"]:
-            return state["route"]
+            route: Literal["math", "text"] = state["route"]  # type: ignore[assignment]
+            return route
         
         builder = StateGraph(RouteState)
         builder.add_node("classify", classify)
@@ -485,10 +486,19 @@ class TestGraphStructure(unittest.TestCase):
         class TestState(TypedDict):
             value: str
         
+        def node_func_1(state: TestState) -> dict:
+            return {"value": "1"}
+        
+        def node_func_2(state: TestState) -> dict:
+            return {"value": "2"}
+        
+        def node_func_3(state: TestState) -> dict:
+            return {"value": "3"}
+        
         builder = StateGraph(TestState)
-        builder.add_node("node1", lambda s: {"value": "1"})
-        builder.add_node("node2", lambda s: {"value": "2"})
-        builder.add_node("node3", lambda s: {"value": "3"})
+        builder.add_node("node1", node_func_1)
+        builder.add_node("node2", node_func_2)
+        builder.add_node("node3", node_func_3)
         
         builder.add_edge(START, "node1")
         builder.add_edge("node1", "node2")
