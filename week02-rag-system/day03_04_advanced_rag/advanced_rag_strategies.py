@@ -778,6 +778,8 @@ class AdvancedRAGSystem:
     
     def _basic_search(self, query: str) -> List[SearchResult]:
         """基础向量检索"""
+        if self.hybrid_retriever.vector_store is None:
+            raise RuntimeError("请先调用 index() 方法建立向量索引")
         return self.hybrid_retriever.vector_store.search(query, top_k=self.top_k)
     
     def _hybrid_search(self, query: str) -> List[SearchResult]:
