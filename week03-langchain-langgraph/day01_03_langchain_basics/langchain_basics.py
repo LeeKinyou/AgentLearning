@@ -36,7 +36,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 # 第一部分：LLM初始化
 # ============================================================
 
-def create_llm(temperature: float = 0.0, model: str = None):
+def create_llm(temperature: float = 0.0, model: str | None = None):
     """
     创建LLM实例
     
@@ -64,8 +64,8 @@ def create_llm(temperature: float = 0.0, model: str = None):
     return ChatOpenAI(
         model=model_name,
         temperature=temperature,
-        openai_api_key=api_key,
-        openai_api_base=base_url,
+        api_key=api_key,
+        base_url=base_url,
     )
 
 
