@@ -26,6 +26,7 @@ import os
 import sys
 from typing import TypedDict, Annotated, List, Optional, Literal
 from dotenv import load_dotenv
+from pydantic import SecretStr
 
 # 加载环境变量
 load_dotenv()
@@ -58,7 +59,7 @@ def create_llm(temperature: float = 0.0, model: str | None = None):
     return ChatOpenAI(
         model=model_name,
         temperature=temperature,
-        api_key=api_key,
+        api_key=SecretStr(api_key),
         base_url=base_url,
     )
 

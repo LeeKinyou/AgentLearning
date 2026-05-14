@@ -278,7 +278,8 @@ def demonstrate_memory():
     
     from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
     from langchain_core.output_parsers import StrOutputParser
-    from langchain_openai import ChatOpenAI
+    from langchain_core.chat_history import InMemoryChatMessageHistory
+    from langchain_core.messages import HumanMessage, AIMessage
     
     llm = create_llm(temperature=0.7)
     
@@ -286,45 +287,39 @@ def demonstrate_memory():
     print("\n[1] ConversationBufferMemory（完整对话历史）")
     print("-" * 40)
     
-    from langchain.memory import ConversationBufferMemory
-    
-    # 创建记忆实例
-    # return_messages=True 表示返回消息对象而非字符串
-    buffer_memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True
-    )
+    buffer_memory = InMemoryChatMessageHistory()
     
     # 添加对话
-    buffer_memory.save_context({"input": "你好，我叫小明"}, {"output": "你好小明！很高兴认识你。"})
-    buffer_memory.save_context({"input": "我喜欢编程"}, {"output": "编程是一项很有用的技能！"})
+    buffer_memory.add_message(HumanMessage(content="你好，我叫小明"))
+    buffer_memory.add_message(AIMessage(content="你好小明！很高兴认识你。"))
+    buffer_memory.add_message(HumanMessage(content="我喜欢编程"))
+    buffer_memory.add_message(AIMessage(content="编程是一项很有用的技能！"))
     
     # 查看记忆内容
     print(f"记忆中的对话：")
-    for msg in buffer_memory.load_memory_variables({})["chat_history"]:
+    for msg in buffer_memory.messages:
         print(f"  {msg.type}: {msg.content}")
     
-    # --- 2. ConversationSummaryMemory（摘要记忆）---
+    # --- 2. ConversationSummaryMemory（对话摘要）---
     print("\n[2] ConversationSummaryMemory（对话摘要）")
     print("-" * 40)
     
-    from langchain.memory import ConversationSummaryMemory
-    
-    # 创建摘要记忆
-    # 使用LLM对对话历史进行摘要，节省上下文窗口
-    summary_memory = ConversationSummaryMemory(
-        llm=llm,
-        memory_key="chat_history",
-        return_messages=True
-    )
+    summary_memory = InMemoryChatMessageHistory()
     
     # 添加对话
-    summary_memory.save_context({"input": "我想学习Python"}, {"output": "Python是一门很好的入门语言。"})
-    summary_memory.save_context({"input": "有什么推荐资源吗？"}, {"output": "推荐官方文档和Codecademy。"})
+    summary_memory.add_message(HumanMessage(content="我想学习Python"))
+    summary_memory.add_message(AIMessage(content="Python是一门很好的入门语言。"))
+    summary_memory.add_message(HumanMessage(content="有什么推荐资源吗？"))
+    summary_memory.add_message(AIMessage(content="推荐官方文档和Codecademy。"))
     
-    # 查看摘要
-    summary = summary_memory.load_memory_variables({})
-    print(f"对话摘要：{summary.get('chat_history', '无摘要')}")
+    # 使用LLM生成摘要
+    summary_prompt = ChatPromptTemplate.from_messages([
+        ("system", "请用一句话总结以下对话内容："),
+        MessagesPlaceholder(variable_name="messages"),
+    ])
+    summary_chain = summary_prompt | llm | StrOutputParser()
+    summary_text = summary_chain.invoke({"messages": summary_memory.messages})
+    print(f"对话摘要：{summary_text}")
     
     # --- 3. 带记忆的对话链 ---
     print("\n[3] 带记忆的对话链")
@@ -362,7 +357,6 @@ def demonstrate_memory():
         print(f"助手：{response}")
         
         # 更新对话历史
-        from langchain_core.messages import HumanMessage, AIMessage
         chat_history.append(HumanMessage(content=question))
         chat_history.append(AIMessage(content=response))
 
