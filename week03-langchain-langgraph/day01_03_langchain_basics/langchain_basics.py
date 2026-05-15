@@ -146,6 +146,7 @@ def demonstrate_chains():
     print("-" * 40)
     
     from pydantic import BaseModel, Field
+    from typing import Union, Dict, Any
     
     # 定义输出结构
     class BookRecommendation(BaseModel):
@@ -165,11 +166,25 @@ def demonstrate_chains():
     
     recommendation_chain = rec_prompt | structured_llm
     
-    recommendation: BookRecommendation = recommendation_chain.invoke({"interest": "人工智能"})
-    print(f"推荐书籍：{recommendation.title}")
-    print(f"作者：{recommendation.author}")
-    print(f"推荐理由：{recommendation.reason}")
-    print(f"难度：{recommendation.difficulty}")
+    recommendation: Union[BookRecommendation, Dict[str, Any]] = recommendation_chain.invoke({"interest": "人工智能"})
+    
+    # 安全地提取推荐信息
+    if isinstance(recommendation, dict):
+        title = recommendation.get('title', '未知')
+        author = recommendation.get('author', '未知')
+        reason = recommendation.get('reason', '未知')
+        difficulty = recommendation.get('difficulty', '未知')
+    else:
+        # 假设是Pydantic模型
+        title = getattr(recommendation, 'title', '未知')
+        author = getattr(recommendation, 'author', '未知')
+        reason = getattr(recommendation, 'reason', '未知')
+        difficulty = getattr(recommendation, 'difficulty', '未知')
+    
+    print(f"推荐书籍：{title}")
+    print(f"作者：{author}")
+    print(f"推荐理由：{reason}")
+    print(f"难度：{difficulty}")
 
 
 # ============================================================
