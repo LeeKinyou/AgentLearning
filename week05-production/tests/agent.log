@@ -1,0 +1,20 @@
+2026-05-17 16:56:54,256 - AgentService - ERROR - 服务 always_fail 失败 (1/2): 总是失败
+2026-05-17 16:56:54,256 - AgentService - ERROR - 服务 always_fail 失败 (2/2): 总是失败
+2026-05-17 16:56:54,257 - AgentService - WARNING - 函数 failing_function 第 1 次尝试失败: 失败. 0.1秒后重试...
+2026-05-17 16:56:54,358 - AgentService - WARNING - 函数 failing_function 第 2 次尝试失败: 失败. 0.2秒后重试...
+2026-05-17 16:56:54,559 - AgentService - WARNING - 主函数 main_func 失败，执行降级: 主函数失败
+2026-05-17 16:56:54,562 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:56:54,562 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:56:54,567 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:56:54,567 - AgentService - WARNING - 函数 call_llm_with_retry 第 1 次尝试失败: LLM服务暂时不可用. 1.0秒后重试...
+2026-05-17 16:56:55,567 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:57:42,876 - AgentService - ERROR - 服务 always_fail 失败 (1/2): 总是失败
+2026-05-17 16:57:42,877 - AgentService - ERROR - 服务 always_fail 失败 (2/2): 总是失败
+2026-05-17 16:57:42,877 - AgentService - WARNING - 函数 failing_function 第 1 次尝试失败: 失败. 0.1秒后重试...
+2026-05-17 16:57:42,978 - AgentService - WARNING - 函数 failing_function 第 2 次尝试失败: 失败. 0.2秒后重试...
+2026-05-17 16:57:43,179 - AgentService - WARNING - 主函数 main_func 失败，执行降级: 主函数失败
+2026-05-17 16:57:43,183 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:57:43,185 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:57:43,187 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:57:43,189 - AgentService - WARNING - LangFuse未安装，可观测性功能已禁用
+2026-05-17 16:57:43,189 - AgentService - WARNING - 函数 call_llm_with_retry 第 1 次尝试失败: LLM服务暂时不可用. 1.0秒后重试...
