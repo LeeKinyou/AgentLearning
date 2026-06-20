@@ -192,22 +192,22 @@ class TestLangGraphBasics(unittest.TestCase):
     
     def test_simple_graph_execution(self):
         """测试简单图执行"""
-        from langgraph.graph import StateGraph, END
-        
+        from langgraph.graph import StateGraph, END, START
+
         class TestState(TypedDict):
             input: str
             result: str
-        
+
         def step_one(state: TestState) -> dict:
             return {"result": f"processed_{state['input']}"}
-        
+
         def step_two(state: TestState) -> dict:
             return {"result": f"final_{state['result']}"}
-        
+
         builder = StateGraph(TestState)
         builder.add_node("one", step_one)
         builder.add_node("two", step_two)
-        builder.set_entry_point("one")
+        builder.add_edge(START, "one")
         builder.add_edge("one", "two")
         builder.add_edge("two", END)
         
@@ -218,23 +218,23 @@ class TestLangGraphBasics(unittest.TestCase):
     
     def test_graph_with_list_accumulation(self):
         """测试列表累积（Annotated）"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import Annotated
         import operator
-        
+
         class AccumState(TypedDict):
             items: Annotated[list, operator.add]
-        
+
         def add_item(state: AccumState) -> dict:
             return {"items": ["item1"]}
-        
+
         def add_another(state: AccumState) -> dict:
             return {"items": ["item2"]}
-        
+
         builder = StateGraph(AccumState)
         builder.add_node("first", add_item)
         builder.add_node("second", add_another)
-        builder.set_entry_point("first")
+        builder.add_edge(START, "first")
         builder.add_edge("first", "second")
         builder.add_edge("second", END)
         
@@ -253,36 +253,36 @@ class TestConditionalRouting(unittest.TestCase):
     
     def test_conditional_edges(self):
         """测试条件边"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import Literal
-        
+
         class RouteState(TypedDict):
             input: str
             route: str
             result: str
-        
+
         def classify(state: RouteState) -> dict:
             if "math" in state["input"]:
                 return {"route": "math"}
             else:
                 return {"route": "text"}
-        
+
         def math_handler(state: RouteState) -> dict:
             return {"result": "数学处理结果"}
-        
+
         def text_handler(state: RouteState) -> dict:
             return {"result": "文本处理结果"}
-        
+
         def route_func(state: RouteState) -> Literal["math", "text"]:
             route: Literal["math", "text"] = state["route"]  # type: ignore[assignment]
             return route
-        
+
         builder = StateGraph(RouteState)
         builder.add_node("classify", classify)
         builder.add_node("math", math_handler)
         builder.add_node("text", text_handler)
-        
-        builder.set_entry_point("classify")
+
+        builder.add_edge(START, "classify")
         builder.add_conditional_edges(
             "classify",
             route_func,
@@ -311,28 +311,28 @@ class TestWorkflow(unittest.TestCase):
     
     def test_linear_workflow(self):
         """测试线性工作流"""
-        from langgraph.graph import StateGraph, END
-        
+        from langgraph.graph import StateGraph, END, START
+
         class WorkflowState(TypedDict):
             step1: str
             step2: str
             step3: str
-        
+
         def process_1(state: WorkflowState) -> dict:
             return {"step1": "完成步骤1"}
-        
+
         def process_2(state: WorkflowState) -> dict:
             return {"step2": "完成步骤2"}
-        
+
         def process_3(state: WorkflowState) -> dict:
             return {"step3": "完成步骤3"}
-        
+
         builder = StateGraph(WorkflowState)
         builder.add_node("s1", process_1)
         builder.add_node("s2", process_2)
         builder.add_node("s3", process_3)
-        
-        builder.set_entry_point("s1")
+
+        builder.add_edge(START, "s1")
         builder.add_edge("s1", "s2")
         builder.add_edge("s2", "s3")
         builder.add_edge("s3", END)
@@ -346,30 +346,30 @@ class TestWorkflow(unittest.TestCase):
     
     def test_workflow_with_loop(self):
         """测试带循环的工作流"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import Literal
-        
+
         class LoopState(TypedDict):
             count: int
             done: bool
-        
+
         def increment(state: LoopState) -> dict:
             new_count = state["count"] + 1
             return {"count": new_count, "done": new_count >= 3}
-        
+
         def finish(state: LoopState) -> dict:
             return {"done": True}
-        
+
         def check_loop(state: LoopState) -> Literal["increment", "finish"]:
             if state["count"] >= 3:
                 return "finish"
             return "increment"
-        
+
         builder = StateGraph(LoopState)
         builder.add_node("increment", increment)
         builder.add_node("finish", finish)
-        
-        builder.set_entry_point("increment")
+
+        builder.add_edge(START, "increment")
         builder.add_conditional_edges("increment", check_loop)
         builder.add_edge("finish", END)
         
@@ -389,36 +389,36 @@ class TestHumanInLoop(unittest.TestCase):
     
     def test_approval_flow(self):
         """测试审核通过流程"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import Literal
-        
+
         class ApprovalState(TypedDict):
             draft: str
             approved: bool
             final: str
-        
+
         def generate(state: ApprovalState) -> dict:
             return {"draft": "草稿内容"}
-        
+
         def review(state: ApprovalState) -> dict:
             return {"approved": True}
-        
+
         def publish(state: ApprovalState) -> dict:
             return {"final": f"发布：{state['draft']}"}
-        
+
         def reject(state: ApprovalState) -> dict:
             return {"final": "拒绝发布"}
-        
+
         def check(state: ApprovalState) -> Literal["publish", "reject"]:
             return "publish" if state["approved"] else "reject"
-        
+
         builder = StateGraph(ApprovalState)
         builder.add_node("generate", generate)
         builder.add_node("review", review)
         builder.add_node("publish", publish)
         builder.add_node("reject", reject)
-        
-        builder.set_entry_point("generate")
+
+        builder.add_edge(START, "generate")
         builder.add_edge("generate", "review")
         builder.add_conditional_edges("review", check)
         builder.add_edge("publish", END)
@@ -431,36 +431,36 @@ class TestHumanInLoop(unittest.TestCase):
     
     def test_rejection_flow(self):
         """测试审核拒绝流程"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import Literal
-        
+
         class ApprovalState(TypedDict):
             draft: str
             approved: bool
             final: str
-        
+
         def generate(state: ApprovalState) -> dict:
             return {"draft": "草稿内容"}
-        
+
         def review(state: ApprovalState) -> dict:
             return {"approved": False}
-        
+
         def publish(state: ApprovalState) -> dict:
             return {"final": f"发布：{state['draft']}"}
-        
+
         def reject(state: ApprovalState) -> dict:
             return {"final": "拒绝发布"}
-        
+
         def check(state: ApprovalState) -> Literal["publish", "reject"]:
             return "publish" if state["approved"] else "reject"
-        
+
         builder = StateGraph(ApprovalState)
         builder.add_node("generate", generate)
         builder.add_node("review", review)
         builder.add_node("publish", publish)
         builder.add_node("reject", reject)
-        
-        builder.set_entry_point("generate")
+
+        builder.add_edge(START, "generate")
         builder.add_edge("generate", "review")
         builder.add_conditional_edges("review", check)
         builder.add_edge("publish", END)
@@ -511,33 +511,33 @@ class TestGraphStructure(unittest.TestCase):
     
     def test_graph_with_multiple_edges(self):
         """测试多分支图"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import Literal
-        
+
         class MultiState(TypedDict):
             input: str
             branch: str
             result_a: str
             result_b: str
-        
+
         def split(state: MultiState) -> dict:
             return {"branch": state["input"]}
-        
+
         def branch_a(state: MultiState) -> dict:
             return {"result_a": f"A处理：{state['branch']}"}
-        
+
         def branch_b(state: MultiState) -> dict:
             return {"result_b": f"B处理：{state['branch']}"}
-        
+
         def route(state: MultiState) -> Literal["a", "b"]:
             return "a" if state["branch"].startswith("A") else "b"
-        
+
         builder = StateGraph(MultiState)
         builder.add_node("split", split)
         builder.add_node("a", branch_a)
         builder.add_node("b", branch_b)
-        
-        builder.set_entry_point("split")
+
+        builder.add_edge(START, "split")
         builder.add_conditional_edges("split", route)
         builder.add_edge("a", END)
         builder.add_edge("b", END)

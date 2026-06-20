@@ -18,7 +18,7 @@ Day 1-2: 基础RAG流水线实现
 
 import os
 import re
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 from dataclasses import dataclass
 from dotenv import load_dotenv
 
@@ -52,9 +52,9 @@ class Document:
         ... )
     """
     content: str
-    metadata: Dict = None
+    metadata: Optional[Dict] = None
     doc_id: str = ""
-    
+
     def __post_init__(self):
         """
         数据初始化后处理
@@ -93,10 +93,10 @@ class Chunk:
         ... )
     """
     content: str
-    metadata: Dict = None
+    metadata: Optional[Dict] = None
     chunk_id: str = ""
     doc_id: str = ""
-    
+
     def __post_init__(self):
         """数据初始化后处理"""
         if self.metadata is None:
@@ -180,7 +180,7 @@ class DocumentLoader:
         self,
         directory: str,
         encoding: str = "utf-8",
-        extensions: List[str] = None
+        extensions: Optional[List[str]] = None
     ) -> List[Document]:
         """
         从目录批量加载文档
@@ -391,7 +391,7 @@ class TextChunker:
             chunk = Chunk(
                 content=text,
                 metadata={
-                    **document.metadata,
+                    **(document.metadata or {}),
                     "chunk_index": i,
                     "chunk_size": len(text),
                     "strategy": strategy
@@ -427,7 +427,7 @@ class VectorStore:
         >>> results = store.search("查询文本", top_k=3)
     """
     
-    def __init__(self, collection_name: str = "default", persist_directory: str = None):
+    def __init__(self, collection_name: str = "default", persist_directory: Optional[str] = None):
         """
         初始化向量数据库
         
@@ -555,15 +555,19 @@ class VectorStore:
         
         # 解析结果
         search_results = []
-        for i in range(len(results['ids'][0])):
+        documents = results.get('documents') or []
+        metadatas = results.get('metadatas') or []
+        distances = results.get('distances') or []
+        ids = results.get('ids') or []
+        for i in range(len(ids[0])):
             chunk = Chunk(
-                content=results['documents'][0][i],
-                metadata=results['metadatas'][0][i],
-                chunk_id=results['ids'][0][i]
+                content=documents[0][i],  # type: ignore[index]
+                metadata=metadatas[0][i],  # type: ignore[index]
+                chunk_id=ids[0][i]  # type: ignore[index]
             )
-            
+
             # Chroma返回的是距离（越小越相似），转换为相似度分数
-            distance = results['distances'][0][i]
+            distance = distances[0][i]  # type: ignore[index]
             score = 1.0 / (1.0 + distance)  # 距离转相似度
             
             search_results.append(SearchResult(
@@ -644,7 +648,7 @@ class LLMClient:
             )
         return self._client
     
-    def chat(self, messages: List[Dict[str, str]]) -> str:
+    def chat(self, messages: List[Dict[str, str]]) -> str:  # type: ignore[override]
         """
         发送消息并获取回复
         
@@ -657,11 +661,12 @@ class LLMClient:
         try:
             response = self._get_client().chat.completions.create(
                 model=self.model,
-                messages=messages,
+                messages=messages,  # type: ignore[arg-type]
                 temperature=self.temperature,
                 max_tokens=self.max_tokens
             )
-            return response.choices[0].message.content.strip()
+            content = response.choices[0].message.content
+            return content.strip() if content else ""
         except Exception as e:
             return f"API调用失败：{str(e)}"
 

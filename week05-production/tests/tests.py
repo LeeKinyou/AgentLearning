@@ -343,11 +343,15 @@ class TestModelDefinitions(unittest.TestCase):
         # 测试有效请求
         request = AgentRequest(
             query="你好",
+            session_id=None,
             temperature=0.7,
-            stream=False
+            stream=False,
+            metadata=None,
         )
         self.assertEqual(request.query, "你好")
         self.assertEqual(request.temperature, 0.7)
+        self.assertIsNone(request.session_id)
+        self.assertIsNone(request.metadata)
         self.assertFalse(request.stream)
     
     def test_agent_response_model(self):
@@ -357,9 +361,14 @@ class TestModelDefinitions(unittest.TestCase):
         response = AgentResponse(
             success=True,
             data={"response": "你好！"},
-            timestamp="2024-01-01T00:00:00"
+            error=None,
+            session_id=None,
+            timestamp="2024-01-01T00:00:00",
+            latency_ms=None,
         )
         self.assertTrue(response.success)
+        self.assertIsNotNone(response.data)
+        assert response.data is not None
         self.assertEqual(response.data["response"], "你好！")
     
     def test_health_check_model(self):

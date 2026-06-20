@@ -65,7 +65,7 @@ def test_document_model():
     )
     
     assert doc.content == "测试内容", "内容不正确"
-    assert doc.metadata["source"] == "test.txt", "元数据不正确"
+    assert doc.metadata is not None and doc.metadata["source"] == "test.txt", "元数据不正确"
     assert doc.doc_id == "doc_001", "文档ID不正确"
     
     print(f"[PASS] Document模型创建成功：{doc.doc_id}")
@@ -224,8 +224,8 @@ def test_trace_span():
     span.end()
     
     assert span.status == "success", "状态应为success"
-    assert span.duration_ms > 0, "持续时间应大于0"
-    assert span.duration_ms >= 90, "持续时间应接近100ms"  # 允许误差
+    assert span.duration_ms is not None and span.duration_ms > 0, "持续时间应大于0"
+    assert span.duration_ms is not None and span.duration_ms >= 90, "持续时间应接近100ms"  # 允许误差
     
     print(f"[PASS] TraceSpan计时成功：{span.duration_ms:.2f}ms")
 
@@ -238,9 +238,9 @@ def test_trace():
     span1 = trace.add_span("retrieval")
     span2 = trace.add_span("llm_call")
     
-    assert len(trace.spans) == 2, "应有2个Span"
-    
-    print(f"[PASS] Trace创建成功：{len(trace.spans)}个Span")
+    assert trace.spans is not None and len(trace.spans) == 2, "应有2个Span"
+
+    print(f"[PASS] Trace创建成功：{len(trace.spans) if trace.spans else 0}个Span")
     
     # 测试计时
     trace.start()
@@ -248,8 +248,8 @@ def test_trace():
     time.sleep(0.05)
     trace.end()
     
-    assert trace.metadata['total_duration_ms'] > 0, "总时间应大于0"
-    
+    assert trace.metadata is not None and trace.metadata['total_duration_ms'] > 0, "总时间应大于0"
+
     print(f"[PASS] Trace计时成功：{trace.metadata['total_duration_ms']:.2f}ms")
 
 

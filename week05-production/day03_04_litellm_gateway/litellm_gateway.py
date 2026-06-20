@@ -231,8 +231,8 @@ class LiteLLMGateway:
                 )
                 
                 # 记录Token使用量
-                usage = response.get("usage", {})
-                token_count = usage.get("total_tokens", 0)
+                usage = response.get("usage", {})  # type: ignore[attr-defined]
+                token_count = usage.get("total_tokens", 0)  # type: ignore[union-attr]
                 self.token_counts[model_name].append((time.time(), token_count))
                 
                 # 计算成本
@@ -241,7 +241,7 @@ class LiteLLMGateway:
                 
                 return {
                     "success": True,
-                    "content": response["choices"][0]["message"]["content"],
+                    "content": response["choices"][0]["message"]["content"],  # type: ignore[index]
                     "model": model_name,
                     "tokens": token_count,
                     "cost": cost,

@@ -106,23 +106,23 @@ class TestLangGraphMultiAgent(unittest.TestCase):
     
     def test_graph_creation(self):
         """测试图创建"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import TypedDict, List
-        
+
         class SimpleState(TypedDict):
             input: str
             output: str
             steps: List[str]
-        
+
         def node_a(state: SimpleState) -> dict:
             return {
                 "output": f"processed_{state['input']}",
                 "steps": state.get("steps", []) + ["node_a"]
             }
-        
+
         builder = StateGraph(SimpleState)
         builder.add_node("process", node_a)
-        builder.set_entry_point("process")
+        builder.add_edge(START, "process")
         builder.add_edge("process", END)
         
         graph = builder.compile()
@@ -131,30 +131,30 @@ class TestLangGraphMultiAgent(unittest.TestCase):
     
     def test_graph_execution(self):
         """测试图执行"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import TypedDict, List
-        
+
         class TestState(TypedDict):
             input: str
             output: str
             steps: List[str]
-        
+
         def step_one(state: TestState) -> dict:
             return {
                 "output": f"step1_{state['input']}",
                 "steps": state.get("steps", []) + ["step_one"]
             }
-        
+
         def step_two(state: TestState) -> dict:
             return {
                 "output": f"{state['output']}_step2",
                 "steps": state.get("steps", []) + ["step_two"]
             }
-        
+
         builder = StateGraph(TestState)
         builder.add_node("step1", step_one)
         builder.add_node("step2", step_two)
-        builder.set_entry_point("step1")
+        builder.add_edge(START, "step1")
         builder.add_edge("step1", "step2")
         builder.add_edge("step2", END)
         
@@ -171,36 +171,39 @@ class TestLangGraphMultiAgent(unittest.TestCase):
     
     def test_conditional_routing(self):
         """测试条件路由"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import TypedDict, Literal
-        
+
         class RouterState(TypedDict):
             input: str
             route: str
             result: str
-        
+
         def classify(state: RouterState) -> dict:
             if "数学" in state["input"]:
                 route = "math"
             else:
                 route = "other"
             return {"route": route}
-        
+
         def handle_math(state: RouterState) -> dict:
             return {"result": "数学处理结果"}
-        
+
         def handle_other(state: RouterState) -> dict:
             return {"result": "其他处理结果"}
-        
+
         def route(state: RouterState) -> Literal["math", "other"]:
-            return state["route"]
-        
+            route_val: str = state["route"]
+            if route_val == "math":
+                return "math"
+            return "other"
+
         builder = StateGraph(RouterState)
         builder.add_node("classify", classify)
         builder.add_node("math", handle_math)
         builder.add_node("other", handle_other)
-        
-        builder.set_entry_point("classify")
+
+        builder.add_edge(START, "classify")
         builder.add_conditional_edges("classify", route, {"math": "math", "other": "other"})
         builder.add_edge("math", END)
         builder.add_edge("other", END)
@@ -215,27 +218,27 @@ class TestLangGraphMultiAgent(unittest.TestCase):
     
     def test_loop_mechanism(self):
         """测试循环机制"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import TypedDict, Literal
-        
+
         class LoopState(TypedDict):
             count: int
             max_count: int
             done: bool
-        
+
         def increment(state: LoopState) -> dict:
             new_count = state["count"] + 1
             return {
                 "count": new_count,
                 "done": new_count >= state["max_count"]
             }
-        
+
         def check_done(state: LoopState) -> Literal["continue", "end"]:
             return "end" if state["done"] else "continue"
-        
+
         builder = StateGraph(LoopState)
         builder.add_node("increment", increment)
-        builder.set_entry_point("increment")
+        builder.add_edge(START, "increment")
         builder.add_conditional_edges("increment", check_done, {"continue": "increment", "end": END})
         
         graph = builder.compile()
@@ -282,40 +285,40 @@ class TestMultiAgentWorkflow(unittest.TestCase):
     
     def test_workflow_structure(self):
         """测试工作流结构"""
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import StateGraph, END, START
         from typing import TypedDict, List
-        
+
         class WorkflowState(TypedDict):
             topic: str
             collected_info: str
             analysis_result: str
             final_report: str
             steps: List[str]
-        
+
         def collect(state: WorkflowState) -> dict:
             return {
                 "collected_info": f"关于{state['topic']}的信息",
                 "steps": state.get("steps", []) + ["collect"]
             }
-        
+
         def analyze(state: WorkflowState) -> dict:
             return {
                 "analysis_result": f"分析结果",
                 "steps": state.get("steps", []) + ["analyze"]
             }
-        
+
         def write(state: WorkflowState) -> dict:
             return {
                 "final_report": f"最终报告",
                 "steps": state.get("steps", []) + ["write"]
             }
-        
+
         builder = StateGraph(WorkflowState)
         builder.add_node("collect", collect)
         builder.add_node("analyze", analyze)
         builder.add_node("write", write)
-        
-        builder.set_entry_point("collect")
+
+        builder.add_edge(START, "collect")
         builder.add_edge("collect", "analyze")
         builder.add_edge("analyze", "write")
         builder.add_edge("write", END)
@@ -339,10 +342,10 @@ class TestMultiAgentWorkflow(unittest.TestCase):
             task2 = Task(description="任务2", expected_output="输出2", agent=agent, context=[task1])
             task3 = Task(description="任务3", expected_output="输出3", agent=agent, context=[task2])
             
-            self.assertEqual(len(task2.context), 1)
-            self.assertEqual(len(task3.context), 1)
-            self.assertIn(task1, task2.context)
-            self.assertIn(task2, task3.context)
+            self.assertEqual(len(task2.context), 1)  # type: ignore[arg-type]
+            self.assertEqual(len(task3.context), 1)  # type: ignore[arg-type]
+            self.assertIn(task1, task2.context)  # type: ignore[arg-type]
+            self.assertIn(task2, task3.context)  # type: ignore[arg-type]
         except ImportError:
             self.skipTest("crewai未安装")
 

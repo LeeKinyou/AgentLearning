@@ -215,7 +215,7 @@ class LLMChatClient:
             
             # 提取并返回生成的文本内容
             # response.choices[0].message.content 包含AI的回复
-            return response.choices[0].message.content
+            return response.choices[0].message.content or ""
             
         except Exception as e:
             # 捕获并格式化API调用异常
@@ -248,7 +248,7 @@ class LLMChatClient:
         # 启用stream=True开启流式输出
         response = self._get_client().chat.completions.create(
             model=self.model,
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             stream=True  # 关键参数：启用流式输出
@@ -330,6 +330,7 @@ def demonstrate_token_usage():
         
         # 提取Token使用信息
         usage = response.usage
+        assert usage is not None
         print(f"提示词Token数（Prompt Tokens）：{usage.prompt_tokens}")
         print(f"生成Token数（Completion Tokens）：{usage.completion_tokens}")
         print(f"总Token数（Total Tokens）：{usage.total_tokens}")

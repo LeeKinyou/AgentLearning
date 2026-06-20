@@ -69,7 +69,7 @@ class TraceSpan:
     start_time: Optional[float] = None
     end_time: Optional[float] = None
     duration_ms: Optional[float] = None
-    metadata: Dict = None
+    metadata: Optional[Dict] = None
     status: str = "pending"
     
     def __post_init__(self):
@@ -90,7 +90,7 @@ class TraceSpan:
             status: 操作状态（success/error）
         """
         self.end_time = time.time()
-        self.duration_ms = (self.end_time - self.start_time) * 1000
+        self.duration_ms = (self.end_time - (self.start_time or 0)) * 1000
         self.status = status
     
     def to_dict(self) -> Dict:
@@ -127,8 +127,8 @@ class Trace:
     name: str
     start_time: Optional[float] = None
     end_time: Optional[float] = None
-    spans: List[TraceSpan] = None
-    metadata: Dict = None
+    spans: Optional[List[TraceSpan]] = None
+    metadata: Optional[Dict] = None
     
     def __post_init__(self):
         """数据初始化后处理"""
@@ -136,30 +136,31 @@ class Trace:
             self.spans = []
         if self.metadata is None:
             self.metadata = {}
-    
+
     def add_span(self, name: str) -> TraceSpan:
         """
         添加新的Span
-        
+
         参数：
             name: Span名称
-        
+
         返回：
             TraceSpan: 新创建的Span
         """
         span = TraceSpan(name=name)
-        self.spans.append(span)
+        self.spans.append(span)  # type: ignore[union-attr]
         return span
-    
+
     def start(self):
         """开始Trace"""
         self.start_time = time.time()
-    
+
     def end(self):
         """结束Trace"""
         self.end_time = time.time()
-        self.metadata['total_duration_ms'] = (self.end_time - self.start_time) * 1000
-    
+        if self.metadata is not None:
+            self.metadata['total_duration_ms'] = (self.end_time - (self.start_time or 0)) * 1000
+
     def to_dict(self) -> Dict:
         """转换为字典"""
         return {
@@ -167,7 +168,7 @@ class Trace:
             'name': self.name,
             'start_time': self.start_time,
             'end_time': self.end_time,
-            'spans': [span.to_dict() for span in self.spans],
+            'spans': [span.to_dict() for span in (self.spans or [])],
             'metadata': self.metadata
         }
 
@@ -369,7 +370,7 @@ class LangFuseObserver:
         
         return self._client
     
-    def start_trace(self, name: str, metadata: Dict = None) -> Trace:
+    def start_trace(self, name: str, metadata: Optional[Dict] = None) -> Trace:
         """
         开始Trace
         
@@ -423,10 +424,10 @@ class LangFuseObserver:
         """
         summary = f"Trace: {trace.name}\n"
         summary += f"  ID: {trace.trace_id}\n"
-        summary += f"  总耗时: {trace.metadata.get('total_duration_ms', 0):.2f}ms\n"
-        summary += f"  Span数量: {len(trace.spans)}\n"
-        
-        for span in trace.spans:
+        summary += f"  总耗时: {(trace.metadata or {}).get('total_duration_ms', 0):.2f}ms\n"
+        summary += f"  Span数量: {len(trace.spans or [])}\n"
+
+        for span in (trace.spans or []):
             status_icon = "✓" if span.status == "success" else "✗"
             summary += f"    {status_icon} {span.name}: {span.duration_ms:.2f}ms\n"
         

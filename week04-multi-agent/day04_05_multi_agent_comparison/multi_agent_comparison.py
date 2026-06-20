@@ -82,8 +82,8 @@ def demonstrate_langgraph_multi_agent():
     print("LangGraph 多Agent协作实现")
     print("=" * 60)
     
-    from langgraph.graph import StateGraph, END
-    
+    from langgraph.graph import StateGraph, END, START
+
     llm = create_llm(temperature=0.7)
     
     # --- 1. 定义State ---
@@ -297,7 +297,7 @@ AI技术不断成熟，应用场景日益丰富。
     builder.add_node("revise_report", revise_report_node)
     
     # 设置入口
-    builder.set_entry_point("collect_info")
+    builder.add_edge(START, "collect_info")
     
     # 定义顺序执行边
     builder.add_edge("collect_info", "analyze_data")
@@ -406,7 +406,7 @@ result = crew.kickoff(inputs={"topic": "主题"})
     print("-" * 40)
     print("""
 # LangGraph代码示例
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph, END, START
 from typing import TypedDict
 
 # 1. 定义State
@@ -423,7 +423,7 @@ def agent_node(state: State) -> dict:
 # 3. 构建图
 builder = StateGraph(State)
 builder.add_node("agent", agent_node)
-builder.set_entry_point("agent")
+builder.add_edge(START, "agent")
 builder.add_edge("agent", END)
 
 graph = builder.compile()

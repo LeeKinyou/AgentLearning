@@ -83,8 +83,8 @@ def demonstrate_langgraph_basics():
     print("LangGraph 核心概念演示")
     print("=" * 60)
     
-    from langgraph.graph import StateGraph, END
-    
+    from langgraph.graph import StateGraph, END, START
+
     # --- 1. State定义 ---
     # State是图的全局状态，所有节点共享和修改这个状态
     # 使用TypedDict定义类型安全的状态结构
@@ -155,9 +155,9 @@ def demonstrate_langgraph_basics():
     graph_builder.add_node("finalize", step_three)
     
     # 添加边（Edge）
-    # set_entry_point: 设置入口节点
+    # add_edge(START, node): 设置入口节点
     # add_edge: 添加从一个节点到另一个节点的边
-    graph_builder.set_entry_point("analyze")
+    graph_builder.add_edge(START, "analyze")
     graph_builder.add_edge("analyze", "process")
     graph_builder.add_edge("process", "finalize")
     graph_builder.add_edge("finalize", END)  # END表示图结束
@@ -203,7 +203,7 @@ def demonstrate_conversation_agent():
     print("带记忆的对话Agent演示")
     print("=" * 60)
     
-    from langgraph.graph import StateGraph, END
+    from langgraph.graph import StateGraph, END, START
     from langchain_core.messages import HumanMessage, AIMessage
     from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
     from langchain_core.output_parsers import StrOutputParser
@@ -249,7 +249,7 @@ def demonstrate_conversation_agent():
     # --- 3. 构建图 ---
     builder = StateGraph(ConversationState)
     builder.add_node("chat", chat_node)
-    builder.set_entry_point("chat")
+    builder.add_edge(START, "chat")
     builder.add_edge("chat", END)
     
     graph = builder.compile()
@@ -301,8 +301,8 @@ def demonstrate_conditional_routing():
     print("条件分支（意图分类路由）演示")
     print("=" * 60)
     
-    from langgraph.graph import StateGraph, END
-    
+    from langgraph.graph import StateGraph, END, START
+
     # --- 1. 定义状态 ---
     class RouterState(TypedDict):
         """路由状态"""
@@ -431,7 +431,7 @@ def demonstrate_conditional_routing():
     builder.add_node("unknown", handle_unknown)
     
     # 设置入口
-    builder.set_entry_point("classify")
+    builder.add_edge(START, "classify")
     
     # 添加条件边
     # add_conditional_edges: 根据路由函数的返回值决定下一个节点
@@ -495,8 +495,8 @@ def demonstrate_human_in_loop():
     print("Human-in-the-loop 演示")
     print("=" * 60)
     
-    from langgraph.graph import StateGraph, END
-    
+    from langgraph.graph import StateGraph, END, START
+
     # --- 1. 定义状态 ---
     class ApprovalState(TypedDict):
         """审核状态"""
@@ -576,7 +576,7 @@ def demonstrate_human_in_loop():
     builder.add_node("publish", publish_response)
     builder.add_node("reject", reject_response)
     
-    builder.set_entry_point("generate")
+    builder.add_edge(START, "generate")
     builder.add_edge("generate", "review")
     
     builder.add_conditional_edges(
@@ -628,8 +628,8 @@ def demonstrate_workflow_agent():
     print("多步骤工作流Agent演示")
     print("=" * 60)
     
-    from langgraph.graph import StateGraph, END
-    
+    from langgraph.graph import StateGraph, END, START
+
     # --- 1. 定义状态 ---
     class WorkflowState(TypedDict):
         """工作流状态"""
@@ -724,7 +724,7 @@ def demonstrate_workflow_agent():
     builder.add_node("revise", revise_draft)
     
     # 添加边
-    builder.set_entry_point("analyze")
+    builder.add_edge(START, "analyze")
     builder.add_edge("analyze", "research")
     builder.add_edge("research", "write")
     builder.add_edge("write", "review")

@@ -56,6 +56,9 @@ def setup_logging():
 
 logger = setup_logging()
 
+# 模块启动时间，用于计算运行时长
+start_time: float = time.time()
+
 
 # ============================================================
 # 重试策略
@@ -168,21 +171,25 @@ class TimeoutHandler:
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 import signal
-                
-                def handler(signum, frame):
-                    raise TimeoutError(f"函数 {func.__name__} 执行超时（{timeout_seconds}秒）")
-                
-                # 设置信号处理器
-                old_handler = signal.signal(signal.SIGALRM, handler)
-                signal.alarm(int(timeout_seconds))
-                
-                try:
-                    result = func(*args, **kwargs)
-                    return result
-                finally:
-                    signal.alarm(0)
-                    signal.signal(signal.SIGALRM, old_handler)
-            
+                import sys
+
+                if sys.platform != "win32" and hasattr(signal, 'SIGALRM'):
+                    def handler(signum, frame):
+                        raise TimeoutError(f"函数 {func.__name__} 执行超时（{timeout_seconds}秒）")
+
+                    # 设置信号处理器
+                    old_handler = signal.signal(signal.SIGALRM, handler)
+                    signal.alarm(int(timeout_seconds))
+
+                    try:
+                        result = func(*args, **kwargs)
+                        return result
+                    finally:
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, old_handler)
+                else:
+                    return func(*args, **kwargs)
+
             return wrapper
         return decorator
     
@@ -387,7 +394,7 @@ class ObservabilityManager:
             return
         
         try:
-            trace = self.langfuse.trace(
+            trace = self.langfuse.trace(  # type: ignore[union-attr]
                 id=trace_id,
                 name="llm_call",
                 metadata=metadata or {}
@@ -427,7 +434,7 @@ class ObservabilityManager:
             return
         
         try:
-            trace = self.langfuse.trace(id=trace_id, name="tool_call")
+            trace = self.langfuse.trace(id=trace_id, name="tool_call")  # type: ignore[union-attr]
             trace.span(
                 name=tool_name,
                 input=parameters,

@@ -244,22 +244,22 @@ class MovieReview(BaseModel):
             str: 格式化的电影评论展示文本
         """
         output = f"""
-电影评论：{self.title}
-{'=' * 40}
-评分：{self.rating}/10
-类型：{self.genre}
-日期：{self.review_date}
+            电影评论：{self.title}
+            {'=' * 40}
+            评分：{self.rating}/10
+            类型：{self.genre}
+            日期：{self.review_date}
 
-总结：
-{self.summary}
+            总结：
+            {self.summary}
 
-优点：
-{chr(10).join(f'  ✓ {p}' for p in self.pros) if self.pros else '  无'}
+            优点：
+            {chr(10).join(f'  + {p}' for p in self.pros) if self.pros else '  无'}
 
-缺点：
-{chr(10).join(f'  ✗ {c}' for c in self.cons) if self.cons else '  无'}
-{'=' * 40}
-"""
+            缺点：
+            {chr(10).join(f'  - {c}' for c in self.cons) if self.cons else '  无'}
+            {'=' * 40}
+            """
         return output
 
 
@@ -340,8 +340,8 @@ class LLMStructuredClient:
     def extract_structured_data(
         self,
         prompt: str,
-        response_format: BaseModel
-    ) -> dict:
+        response_format: type[BaseModel]
+    ) -> BaseModel | None:
         """
         提取结构化数据
         
@@ -390,7 +390,7 @@ class LLMStructuredClient:
             
             # 解析JSON响应
             import json
-            result = json.loads(response.choices[0].message.content)
+            result = json.loads(response.choices[0].message.content or "{}")
             
             # 使用Pydantic模型验证并返回
             return response_format(**result)
@@ -416,6 +416,7 @@ def demonstrate_pydantic_basics():
     
     # 示例1：创建有效实例
     print("\n【示例1】创建有效的电影评论")
+    review = None
     try:
         review = MovieReview(
             title="流浪地球2",
@@ -444,6 +445,8 @@ def demonstrate_pydantic_basics():
     
     # 示例3：模型转字典
     print("\n【示例3】模型序列化")
+    if review is None:
+        return
     review_dict = review.to_dict()
     print(f"字典格式：{review_dict}")
     print(f"JSON Schema：{MovieReview.model_json_schema()['properties'].keys()}")

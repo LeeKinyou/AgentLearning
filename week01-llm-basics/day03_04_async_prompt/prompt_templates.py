@@ -32,7 +32,7 @@ load_dotenv()
 # 数据模型定义
 # ============================================================
 
-@dataclass
+@dataclass  # 自动为类生成 __init__、__repr__、__eq__ 等方法，简化数据类的定义
 class PromptTemplate:
     """
     Prompt 模板数据类

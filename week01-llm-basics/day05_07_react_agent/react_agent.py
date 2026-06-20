@@ -520,11 +520,11 @@ class LLMClient:
         try:
             response = self._get_client().chat.completions.create(
                 model=self.model,
-                messages=messages,
+                messages=messages,  # type: ignore[arg-type]
                 temperature=self.temperature,
                 max_tokens=self.max_tokens
             )
-            return response.choices[0].message.content.strip()
+            return (response.choices[0].message.content or "").strip()
         except Exception as e:
             return f"API调用失败：{str(e)}"
 

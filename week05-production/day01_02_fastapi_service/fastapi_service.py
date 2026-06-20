@@ -21,11 +21,14 @@ Day 1-2: FastAPI封装Agent服务
 import os
 import sys
 import asyncio
-from typing import Optional, List, Dict, Any, AsyncGenerator
+from typing import Optional, List, Dict, Any, AsyncGenerator, TYPE_CHECKING
 from datetime import datetime
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, SecretStr
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 # 加载环境变量
 load_dotenv()
@@ -180,7 +183,7 @@ class AgentService:
         try:
             async for chunk in self.llm.astream(messages):
                 if chunk.content:
-                    yield chunk.content
+                    yield str(chunk.content)
         except Exception as e:
             yield f"[错误] {str(e)}"
     
@@ -278,6 +281,7 @@ def create_app() -> "FastAPI":
                     "response": result["response"],
                     "history_length": result["history_length"]
                 },
+                error=None,
                 session_id=result["session_id"],
                 timestamp=datetime.now().isoformat(),
                 latency_ms=latency

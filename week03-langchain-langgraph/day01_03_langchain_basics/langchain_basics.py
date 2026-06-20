@@ -135,7 +135,7 @@ def demonstrate_chains():
     
     # 组合成顺序链
     # 先执行outline_chain，将其输出作为expand_chain的输入
-    sequential_chain = outline_chain | expand_chain
+    sequential_chain = outline_chain | expand_chain  # type: ignore[operator]
     
     result = sequential_chain.invoke({"topic": "Python编程入门"})
     print(f"主题：Python编程入门")
@@ -394,7 +394,7 @@ def demonstrate_langchain_agent():
     print("=" * 60)
     
     from langchain_core.tools import tool
-    from langgraph.prebuilt import create_react_agent
+    from langchain.agents import create_agent
     from langchain_core.messages import HumanMessage
     
     llm = create_llm(temperature=0.0)
@@ -421,9 +421,9 @@ def demonstrate_langchain_agent():
     
     tools = [calculator, get_date_info]
     
-    # 使用LangGraph的create_react_agent创建Agent
+    # 使用langchain的create_agent创建Agent
     # 这是新版langchain推荐的Agent构建方式
-    agent = create_react_agent(llm, tools)
+    agent = create_agent(llm, tools)
     
     # 测试Agent
     test_questions = [
