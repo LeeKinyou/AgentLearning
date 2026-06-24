@@ -88,11 +88,11 @@ RAG 与微调（Fine-tuning）代表了让 LLM 学习新知识的两种完全不
 
 ```mermaid
 flowchart TD
-    subgraph 离线索引阶段 [离线索引阶段 (Ingestion Pipeline)]
+    subgraph 离线索引阶段 ["离线索引阶段 (Ingestion Pipeline)"]
         Doc[数据源] --> Parse[解析 Parser] --> Clean[清洗 Cleaner] --> Chunk[分块 Chunker] --> Embed[向量化 Embedding] --> DB[(向量数据库 Vector Store)]
     end
 
-    subgraph 在线检索阶段 [在线检索阶段 (Retrieval-Generation)]
+    subgraph 在线检索阶段 ["在线检索阶段 (Retrieval-Generation)"]
         Query[用户提问] --> Rewrite[提问改写/扩展] --> Search[混合检索 Hybrid Search]
         DB -.-> Search
         Search --> Rerank[重排序 Rerank] --> Select[核心片段截取] --> Prompt[组装 Prompt] --> LLM[大语言模型 LLM] --> Answer[最终生成回答]
@@ -279,12 +279,12 @@ flowchart TD
 
 ```mermaid
 graph TD
-    subgraph OptionA [方案 A (物理隔离 - 极高安全)]
+    subgraph OptionA ["方案 A (物理隔离 - 极高安全)"]
         TenantA_Col[租户 A 专属 Collection]
         TenantB_Col[租户 B 专属 Collection]
     end
 
-    subgraph OptionB [方案 B (逻辑隔离 - 高性价比)]
+    subgraph OptionB ["方案 B (逻辑隔离 - 高性价比)"]
         MixedCol[混合 Collection <br> 元数据强制绑定 tenant_id]
         MixedCol --> ChunkA[Chunk 1: tenant_id=A]
         MixedCol --> ChunkB[Chunk 2: tenant_id=B]
